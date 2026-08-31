@@ -1,0 +1,26 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: expenses-db
+  namespace: expenses
+spec:
+  instances: 1
+
+  storage:
+    size: 5Gi
+    storageClass: local-path
+
+  bootstrap:
+    initdb:
+      database: expenses
+      owner: expenses
+      secret:
+        name: expenses-db-credentials
+
+  # Single node, node-bound storage: no HA to attempt.
+  primaryUpdateStrategy: unsupervised
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi

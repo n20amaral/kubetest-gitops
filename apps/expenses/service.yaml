@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: expenses
+  namespace: expenses
+spec:
+  selector:
+    app: expenses
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

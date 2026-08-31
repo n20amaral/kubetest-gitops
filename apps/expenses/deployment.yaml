@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: expenses
+  namespace: expenses
+  labels:
+    app: expenses
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate          # RWO PV is node-bound; don't run two pods at once
+  selector:
+    matchLabels:
+      app: expenses
+  template:
+    metadata:
+      labels:
+        app: expenses
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1654
+        runAsGroup: 1654
+        fsGroup: 1654
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: expenses
+          image: ghcr.io/n20amaral/expenses-app:main-d0eb089-1788180888 # {"$imagepolicy": "flux-system:expenses-app"}
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
+            - name: Receipts__Directory
+              value: /data/receipts
+            - name: PGHOST
+              valueFrom:
+                secretKeyRef:
+                  name: expenses-db-app
+                  key: host
+            - name: PGPORT
+              valueFrom:
+                secretKeyRef:
+                  name: expenses-db-app
+                  key: port
+            - name: PGDATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: expenses-db-app
+                  key: dbname
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: expenses-db-app
+                  key: username
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: expenses-db-app
+                  key: password
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: receipts
+              mountPath: /data/receipts
+            - name: tmp
+              mountPath: /tmp
+            - name: dataprotection
+              mountPath: /home/app/.aspnet
+          readinessProbe:
+            httpGet:
+              path: /expenses
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /expenses
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 192Mi
+            limits:
+              memory: 512Mi
+      volumes:
+        - name: receipts
+          persistentVolumeClaim:
+            claimName: expenses-receipts
+        - name: tmp
+          emptyDir: {}
+        - name: dataprotection
+          emptyDir: {}
