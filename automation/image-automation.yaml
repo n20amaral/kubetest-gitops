@@ -42,7 +42,7 @@ spec:
         name: fluxcdbot
         email: fluxcdbot@users.noreply.github.com
       messageTemplate: |
-        chore(expenses): bump image to {{range .Updated.Images}}{{println .}}{{end}}
+        chore(expenses): bump image to {{range .Changed.Images}}{{println .}}{{end}}
     push:
       branch: main
   update:
