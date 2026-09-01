@@ -35,30 +35,25 @@ spec:
               value: Production
             - name: Receipts__Directory
               value: /data/receipts
+            # bootstrap.initdb.secret points CNPG at expenses-db-credentials as the
+            # app-user credentials, so CNPG does not generate an <cluster>-app secret.
+            # host/port/dbname are stable service facts; user/password come from the
+            # SOPS-encrypted basic-auth secret.
             - name: PGHOST
-              valueFrom:
-                secretKeyRef:
-                  name: expenses-db-app
-                  key: host
+              value: expenses-db-rw
             - name: PGPORT
-              valueFrom:
-                secretKeyRef:
-                  name: expenses-db-app
-                  key: port
+              value: "5432"
             - name: PGDATABASE
-              valueFrom:
-                secretKeyRef:
-                  name: expenses-db-app
-                  key: dbname
+              value: expenses
             - name: PGUSER
               valueFrom:
                 secretKeyRef:
-                  name: expenses-db-app
+                  name: expenses-db-credentials
                   key: username
             - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: expenses-db-app
+                  name: expenses-db-credentials
                   key: password
           securityContext:
             allowPrivilegeEscalation: false
