@@ -4,8 +4,8 @@ metadata:
   name: expenses
   namespace: expenses
   annotations:
-    # Staging first — flip to letsencrypt-prod once a staging cert is observed issuing.
-    cert-manager.io/cluster-issuer: letsencrypt-staging
+    # Staging cert observed issuing 2026-09-01 11:43 UTC — switched to prod.
+    cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
 spec:
   ingressClassName: nginx
